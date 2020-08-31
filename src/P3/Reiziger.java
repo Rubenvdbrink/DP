@@ -1,6 +1,6 @@
-package P2;
+package P3;
 
-import java.sql.*;
+import java.sql.Date;
 
 public class Reiziger {
     private int id;

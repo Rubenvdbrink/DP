@@ -1,4 +1,4 @@
-package P2;
+package P3;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -7,8 +7,9 @@ import java.util.List;
 public class ReizigerDAOPsql implements ReizigerDAO {
 
     private Connection connection;
+    private AdresDAO adao;
 
-    public ReizigerDAOPsql (Connection connection) {
+    public ReizigerDAOPsql(Connection connection) {
         this.connection = connection;
     }
 
