@@ -55,6 +55,8 @@ public class Adres {
         this.postcode = pc;
     }
 
+
+
     @Override
     public String toString() {
         return "Adres {" + woonplaats + " | " + postcode + '\'' + "}";

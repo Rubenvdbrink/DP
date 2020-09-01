@@ -9,8 +9,13 @@ public class ReizigerDAOPsql implements ReizigerDAO {
     private Connection connection;
     private AdresDAO adao;
 
-    public ReizigerDAOPsql(Connection connection) {
+    public ReizigerDAOPsql(Connection connection, AdresDAO adao) {
         this.connection = connection;
+        this.adao = adao;
+    }
+
+    public AdresDAO getAdao() {
+        return adao;
     }
 
     @Override
@@ -22,11 +27,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setString(3, reiziger.getTussenvoegsel());
             preparedStatement.setString(4, reiziger.getAchternaam());
             preparedStatement.setDate(5, reiziger.getGeboortedatum());
-            return preparedStatement.execute();
+            preparedStatement.execute();
+            return true;
         } catch(Exception e){
-            System.out.println("\nGebruiker met id " + reiziger.getId() + " bestaat al!");
+//            System.out.println("\nGebruiker met id " + reiziger.getId() + " bestaat al!");
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -37,23 +43,24 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setString(2, reiziger.getTussenvoegsel());
             preparedStatement.setString(3, reiziger.getAchternaam());
             preparedStatement.setDate(4, reiziger.getGeboortedatum());
-            return preparedStatement.execute();
+            preparedStatement.setInt(5, reiziger.getId());
+            preparedStatement.execute();
+            return true;
         } catch(Exception e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override
     public boolean delete(Reiziger reiziger) {
+        adao.delete(reiziger); //zorgt ervoor dat eerst het adres verwijderd wordt, adres kan namelijk niet bestaan zonder bijbehorende reiziger
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM reiziger WHERE reiziger_id=?");
             preparedStatement.setInt(1, reiziger.getId());
             return preparedStatement.execute();
         } catch(Exception e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -70,12 +77,13 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             String achternaam = resultSet.getString("achternaam");
             Date geboortedatum = resultSet.getDate("geboortedatum");
 
-            return new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
+            Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+            r1.setAdres(adao.findByReiziger(r1));
+            return r1;
 
         } catch(Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -93,13 +101,14 @@ public class ReizigerDAOPsql implements ReizigerDAO {
                 String achternaam = resultSet.getString("achternaam");
                 Date geboortedatum = resultSet.getDate("geboortedatum");
 
-                reizigers.add(new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum));
+                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+                r1.setAdres(adao.findByReiziger(r1));
+                reizigers.add(r1);
             }
             return reizigers;
         } catch(Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -116,13 +125,14 @@ public class ReizigerDAOPsql implements ReizigerDAO {
                 String achternaam = resultSet.getString("achternaam");
                 Date geboortedatum = resultSet.getDate("geboortedatum");
 
-                reizigers.add(new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum));
+                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+                r1.setAdres(adao.findByReiziger(r1));
+                reizigers.add(r1);
             }
             return reizigers;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }

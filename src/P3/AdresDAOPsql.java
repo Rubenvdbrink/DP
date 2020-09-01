@@ -12,6 +12,8 @@ public class AdresDAOPsql implements AdresDAO{
         this.conn = conn;
     }
 
+
+
     @Override
     public boolean save(Adres adres) {
         try {
@@ -21,27 +23,27 @@ public class AdresDAOPsql implements AdresDAO{
             preparedStatement.setString(3, adres.getHuisnummer());
             preparedStatement.setString(4, adres.getStraat());
             preparedStatement.setString(5, adres.getWoonplaats());
-            return preparedStatement.execute();
+            preparedStatement.execute();
+            return true;
         } catch(Exception e){
-            System.out.println("fout");
+            return false;
         }
-        return false;
     }
 
     @Override
     public boolean update(Adres adres) {
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE adres SET adres_id=?, postcode=?, huisnummer=?, straat=? WHERE woonplaats=? ");
-            preparedStatement.setInt(1, adres.getId());
+            PreparedStatement preparedStatement = conn.prepareStatement("UPDATE adres SET woonplaats=?, postcode=?, huisnummer=?, straat=? WHERE adres_id=?");
+            preparedStatement.setString(1, adres.getWoonplaats());
             preparedStatement.setString(2, adres.getPostcode());
             preparedStatement.setString(3, adres.getHuisnummer());
             preparedStatement.setString(4, adres.getStraat());
-            preparedStatement.setString(5, adres.getWoonplaats());
-            return preparedStatement.execute();
+            preparedStatement.setInt(5, adres.getId());
+            preparedStatement.execute();
+            return true;
         } catch(Exception e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -49,11 +51,11 @@ public class AdresDAOPsql implements AdresDAO{
         try {
             PreparedStatement preparedStatement = conn.prepareStatement("DELETE FROM adres WHERE reiziger_id=?");
             preparedStatement.setInt(1, reiziger.getId());
-            return preparedStatement.execute();
+            preparedStatement.execute();
+            return true;
         } catch(Exception e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -73,9 +75,8 @@ public class AdresDAOPsql implements AdresDAO{
 
             return new Adres(adresid, postcode, huisnummer, straat, woonplaats);
         } catch(Exception e) {
-
+            return null;
         }
-        return null;
     }
 
     @Override
