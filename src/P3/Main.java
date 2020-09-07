@@ -14,7 +14,6 @@ public class Main {
 
             ReizigerDAOPsql rdao = new ReizigerDAOPsql(conn, new AdresDAOPsql(conn));
 
-
             testDAO(rdao);
 
             conn.close();

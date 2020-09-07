@@ -2,22 +2,39 @@ package P4;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Reiziger {
-    private int reiziger_id;
+    private int id;
     private String voorletters;
     private String tussenvoegsel;
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
-    private ArrayList OVChipkaarten = new ArrayList();
+    private List<OVChipkaart> ovChipkaarten = new ArrayList<>();
 
-    public int getReiziger_id() {
-        return reiziger_id;
+    public Reiziger(int id, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
+        this.id = id;
+        this.voorletters = voorletters;
+        this.tussenvoegsel = tussenvoegsel;
+        this.achternaam = achternaam;
+        this.geboortedatum = geboortedatum;
     }
 
-    public void setReiziger_id(int reiziger_id) {
-        this.reiziger_id = reiziger_id;
+    public Adres getAdres() {
+        return adres;
+    }
+
+    public void setAdres(Adres adres) {
+        this.adres = adres;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getVoorletters() {
@@ -52,19 +69,24 @@ public class Reiziger {
         this.geboortedatum = geboortedatum;
     }
 
-    public Adres getAdres() {
-        return adres;
+    public List<OVChipkaart> getOvChipkaarten() {
+        return ovChipkaarten;
     }
 
-    public void setAdres(Adres adres) {
-        this.adres = adres;
+    public void setOvChipkaarten(List<OVChipkaart> ovChipkaarten) {
+        this.ovChipkaarten = ovChipkaarten;
     }
 
-    public ArrayList getOVChipkaarten() {
-        return OVChipkaarten;
-    }
-
-    public void setOVChipkaarten(ArrayList OVChipkaarten) {
-        this.OVChipkaarten = OVChipkaarten;
+    @Override
+    public String toString() {
+        return "Reiziger{" +
+                "id=" + id +
+                ", voorletters='" + voorletters + '\'' +
+                ", tussenvoegsel='" + tussenvoegsel + '\'' +
+                ", achternaam='" + achternaam + '\'' +
+                ", geboortedatum=" + geboortedatum +
+                ", adres=" + adres +
+                ", ovChipkaarten=" + ovChipkaarten +
+                '}';
     }
 }

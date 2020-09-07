@@ -1,8 +1,5 @@
 package P4;
 
-
-import P4.Reiziger;
-
 import java.util.List;
 
 public interface ReizigerDAO {

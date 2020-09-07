@@ -7,16 +7,26 @@ import java.util.List;
 public class ReizigerDAOPsql implements ReizigerDAO {
 
     private Connection connection;
+    private AdresDAO adao;
+    private OVChipkaartDAO odao;
 
     public ReizigerDAOPsql(Connection connection) {
         this.connection = connection;
+        this.adao = new AdresDAOPsql(connection);
+        this.odao = new OVChipkaartDAOPsql(connection);
     }
+
+    public AdresDAO getAdao() {
+        return adao;
+    }
+    public OVChipkaartDAO getOdao() { return odao; }
+
 
     @Override
     public boolean save(Reiziger reiziger){
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO reiziger values(?, ?, ?, ?, ?)");
-            preparedStatement.setInt(1, reiziger.getReiziger_id());
+            preparedStatement.setInt(1, reiziger.getId());
             preparedStatement.setString(2, reiziger.getVoorletters());
             preparedStatement.setString(3, reiziger.getTussenvoegsel());
             preparedStatement.setString(4, reiziger.getAchternaam());
@@ -36,7 +46,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setString(2, reiziger.getTussenvoegsel());
             preparedStatement.setString(3, reiziger.getAchternaam());
             preparedStatement.setDate(4, reiziger.getGeboortedatum());
-            preparedStatement.setInt(5, reiziger.getReiziger_id());
+            preparedStatement.setInt(5, reiziger.getId());
             preparedStatement.execute();
             return true;
         } catch(Exception e) {
@@ -46,10 +56,16 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
     @Override
     public boolean delete(Reiziger reiziger) {
+        adao.delete(reiziger); //zorgt ervoor dat eerst het adres verwijderd wordt, adres kan namelijk niet bestaan zonder bijbehorende reiziger
+        for (OVChipkaart ovChipkaart : reiziger.getOvChipkaarten()) { //zorgt ervoor dat eerst de ovchipkaarten worden verwijders, zelfde reden^
+            odao.delete(ovChipkaart);
+        }
+
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM reiziger WHERE reiziger_id=?");
-            preparedStatement.setInt(1, reiziger.getReiziger_id());
-            return preparedStatement.execute();
+            preparedStatement.setInt(1, reiziger.getId());
+            preparedStatement.execute();
+            return true;
         } catch(Exception e) {
             return false;
         }
@@ -69,7 +85,8 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             String achternaam = resultSet.getString("achternaam");
             Date geboortedatum = resultSet.getDate("geboortedatum");
 
-            Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+            Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
+            r1.setAdres(adao.findByReiziger(r1));
             return r1;
 
         } catch(Exception e) {
@@ -92,7 +109,8 @@ public class ReizigerDAOPsql implements ReizigerDAO {
                 String achternaam = resultSet.getString("achternaam");
                 Date geboortedatum = resultSet.getDate("geboortedatum");
 
-                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
+                r1.setAdres(adao.findByReiziger(r1));
                 reizigers.add(r1);
             }
             return reizigers;
@@ -115,11 +133,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
                 String achternaam = resultSet.getString("achternaam");
                 Date geboortedatum = resultSet.getDate("geboortedatum");
 
-                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum, null);
+                Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
+                r1.setAdres(adao.findByReiziger(r1));
+                r1.setOvChipkaarten(odao.findByReiziger(r1));
                 reizigers.add(r1);
             }
             return reizigers;
-
         } catch (SQLException e) {
             return null;
         }
