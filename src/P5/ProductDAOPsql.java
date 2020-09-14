@@ -56,14 +56,16 @@ public class ProductDAOPsql implements ProductDAO {
 
     @Override
     public boolean delete(Product product) {
+        System.out.println(product);
         try {
+            PreparedStatement removeProductFromOvChipkaart = conn.prepareStatement("DELETE FROM ov_chipkaart_product WHERE product_nummer=?");
+            removeProductFromOvChipkaart.setInt(1, product.getProduct_nummer());
+            removeProductFromOvChipkaart.execute();
+
             PreparedStatement removeProduct = conn.prepareStatement("DELETE FROM product WHERE product_nummer=?");
             removeProduct.setInt(1, product.getProduct_nummer());
+            System.out.println(removeProduct);
             removeProduct.execute();
-
-            PreparedStatement removeProductFromOvChipkaart = conn.prepareStatement("DELETE FROM ov_chipkaart_product WHERE product_nummer=?");
-            removeProduct.setInt(1, product.getProduct_nummer());
-            removeProductFromOvChipkaart.execute();
             return true;
         } catch(Exception e) {
             return false;
