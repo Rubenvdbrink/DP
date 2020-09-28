@@ -32,6 +32,15 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setString(4, reiziger.getAchternaam());
             preparedStatement.setDate(5, reiziger.getGeboortedatum());
             preparedStatement.execute();
+
+            //update het adres van de reiziger
+            adao.save(reiziger.getAdres());
+
+            //saved alle ovchipkaarten die horen bij de reiziger
+            for (OVChipkaart ovChipkaart : reiziger.getOvChipkaarten()) {
+                odao.save(ovChipkaart);
+            }
+
             return true;
         } catch(Exception e){
             return false;
@@ -48,6 +57,22 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setDate(4, reiziger.getGeboortedatum());
             preparedStatement.setInt(5, reiziger.getId());
             preparedStatement.execute();
+
+            //update het adres van de reiziger
+            adao.update(reiziger.getAdres());
+
+            //haalt alle ovchipkaarten van de reiziger op
+            List<OVChipkaart> ovchipkaarten = odao.findByReiziger(reiziger);
+
+            //loopt door alle opgehaalde kaarten en vergelijkt ze met de kaarten van het reiziger object
+            for (OVChipkaart ovChipkaart : ovchipkaarten) {
+                if (reiziger.getOvChipkaarten().contains(ovChipkaart)) {
+                    odao.update(ovChipkaart); //als de kaart bestaat in het reiziger object wordt deze geupdate
+                } else {
+                    odao.delete(ovChipkaart); //als de kaart niet bestaat in het reiziger object wordt deze verwijderd
+                }
+            }
+
             return true;
         } catch(Exception e) {
             return false;
@@ -57,7 +82,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
     @Override
     public boolean delete(Reiziger reiziger) {
         adao.delete(reiziger); //zorgt ervoor dat eerst het adres verwijderd wordt, adres kan namelijk niet bestaan zonder bijbehorende reiziger
-        for (OVChipkaart ovChipkaart : reiziger.getOvChipkaarten()) { //zorgt ervoor dat eerst de ovchipkaarten worden verwijders, zelfde reden^
+        for (OVChipkaart ovChipkaart : odao.findByReiziger(reiziger)) { //zorgt ervoor dat eerst de ovchipkaarten worden verwijderd uit de database, zelfde reden^
             odao.delete(ovChipkaart);
         }
 
@@ -87,6 +112,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
             Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
             r1.setAdres(adao.findByReiziger(r1));
+            r1.setOvChipkaarten(odao.findByReiziger(r1));
             return r1;
 
         } catch(Exception e) {
@@ -111,6 +137,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
                 Reiziger r1 = new Reiziger(reizigerid, voorletters, tussenvoegsel, achternaam, geboortedatum);
                 r1.setAdres(adao.findByReiziger(r1));
+                r1.setOvChipkaarten(odao.findByReiziger(r1));
                 reizigers.add(r1);
             }
             return reizigers;

@@ -79,7 +79,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
     }
 
     @Override
-    public List<OVChipkaart> findByReiziger(Reiziger reiziger) { //dit veranderd naar een list omdat een reiziger meerdere kaarten kan hebben
+    public List<OVChipkaart> findByReiziger(Reiziger reiziger) { //dit is veranderd naar een list omdat een reiziger meerdere kaarten kan hebben
         List<OVChipkaart> ovChipkaarten = new ArrayList<>();
         try {
             PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM ov_chipkaart WHERE reiziger_id=?");
