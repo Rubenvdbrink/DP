@@ -1,9 +1,6 @@
 package P5;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +8,12 @@ import java.util.List;
 public class ProductDAOPsql implements ProductDAO {
 
     private Connection conn;
+    private OVChipkaartDAOPsql odao;
 
-    public ProductDAOPsql(Connection conn) { this.conn = conn; }
+    public ProductDAOPsql(Connection conn) {
+        this.conn = conn;
+        this.odao = new OVChipkaartDAOPsql(conn);
+    }
 
     @Override
     public boolean save(Product product) {
@@ -24,15 +25,9 @@ public class ProductDAOPsql implements ProductDAO {
             saveProductDetails.setDouble(4, product.getPrijs());
             saveProductDetails.execute();
 
-            //hier wordt de relatie tussen ovchipkaart en zijn producten gepersisteerd
-            PreparedStatement saveOvChipkaartProducten = conn.prepareStatement("INSERT INTO ov_chipkaart_product values(?, ?, ?, ?)");
-            saveOvChipkaartProducten.setInt(2, product.getProduct_nummer());
-            for(OVChipkaart ovChipkaart : product.getOvChipkaarten()) {
-                saveOvChipkaartProducten.setInt(1, ovChipkaart.getKaart_nummer());
-                saveOvChipkaartProducten.setString(3, "gekocht");
-                saveOvChipkaartProducten.setDate(4, Date.valueOf(LocalDate.now()));
-                saveOvChipkaartProducten.execute();
-            }
+            //hier wordt de relatie tussen het product en zijn ovchipkaarten gepersisteerd
+            setRelations(product);
+
             return true;
         } catch(Exception e) {
             return false;
@@ -48,8 +43,16 @@ public class ProductDAOPsql implements ProductDAO {
             preparedStatement.setDouble(3, product.getPrijs());
             preparedStatement.setInt(4, product.getProduct_nummer());
             preparedStatement.execute();
+
+            //delete de relaties
+            deleteRelations(product);
+
+            //set de relaties opnieuw
+            setRelations(product);
+
             return true;
         } catch(Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -58,10 +61,10 @@ public class ProductDAOPsql implements ProductDAO {
     public boolean delete(Product product) {
         System.out.println(product);
         try {
-            PreparedStatement removeProductFromOvChipkaart = conn.prepareStatement("DELETE FROM ov_chipkaart_product WHERE product_nummer=?");
-            removeProductFromOvChipkaart.setInt(1, product.getProduct_nummer());
-            removeProductFromOvChipkaart.execute();
+            //verwijderd het ovchipkaartproduct van de ovchipkaarten die dit product hebben
+            deleteRelations(product);
 
+            //verwijderd het product zelf
             PreparedStatement removeProduct = conn.prepareStatement("DELETE FROM product WHERE product_nummer=?");
             removeProduct.setInt(1, product.getProduct_nummer());
             System.out.println(removeProduct);
@@ -105,11 +108,39 @@ public class ProductDAOPsql implements ProductDAO {
                 String product_beschrijving = resultSet.getString("beschrijving");
                 Double product_prijs = resultSet.getDouble("prijs");
                 Product p1 = new Product(product_nummer, product_naam, product_beschrijving, product_prijs);
+                //
                 producten.add(p1);
             }
             return producten;
         } catch(Exception e) {
             return null;
+        }
+    }
+
+    //prevent dry code
+    private void deleteRelations(Product product) {
+        try {
+            PreparedStatement removeProductFromOvChipkaart = conn.prepareStatement("DELETE FROM ov_chipkaart_product WHERE product_nummer=?");
+            removeProductFromOvChipkaart.setInt(1, product.getProduct_nummer());
+            removeProductFromOvChipkaart.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //prevent dry code
+    private void setRelations(Product product) {
+        try {
+            PreparedStatement saveOvChipkaartProducten = conn.prepareStatement("INSERT INTO ov_chipkaart_product values(?, ?, ?, ?)");
+            saveOvChipkaartProducten.setInt(2, product.getProduct_nummer());
+            for (OVChipkaart ovChipkaart : product.getOvChipkaarten()) {
+                saveOvChipkaartProducten.setInt(1, ovChipkaart.getKaart_nummer());
+                saveOvChipkaartProducten.setString(3, "gekocht");
+                saveOvChipkaartProducten.setDate(4, Date.valueOf(LocalDate.now()));
+                saveOvChipkaartProducten.execute();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

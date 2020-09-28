@@ -1,5 +1,7 @@
 package P5;
 
+import org.w3c.dom.ls.LSOutput;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -32,7 +34,7 @@ public class Main {
         //test: toon alle producten van bepaalde ovchipkaart
         OVChipkaart o1 = new OVChipkaart(35283, null, 1, 500, 1111);
         System.out.println("-------Alle producten van OVChipkaart met nummer 35283-------");
-        for(Product product : pdao.findByOVChipkaart(o1)) {
+        for (Product product : pdao.findByOVChipkaart(o1)) {
             System.out.println(product);
         }
         System.out.println("-------------------------------------------------------------");
@@ -46,9 +48,9 @@ public class Main {
         //test: nieuw product toevoegen en daarmee ook gelijk alle connecties tussen ovchipkaarten en het nieuwe product
         System.out.println("\n------Nieuw product toevoegen en aan ovkaarten toevoegen-------");
 
-        Product p1 = new Product(100, "Gratis Reizen", "U hoeft niet meer te betalen voor reizen", 0.01);
-        OVChipkaart o2 = new OVChipkaart(19876, Date.valueOf("2021-09-09") , 1, 500, 1);
-        OVChipkaart o3 = new OVChipkaart(19777, Date.valueOf("2021-09-10") , 1, 504, 1);
+        Product p1 = new Product(1000, "Gratis Reizen", "U hoeft niet meer te betalen voor reizen", 0.01);
+        OVChipkaart o2 = new OVChipkaart(19876, Date.valueOf("2021-09-09"), 1, 500, 1);
+        OVChipkaart o3 = new OVChipkaart(19777, Date.valueOf("2021-09-10"), 1, 504, 1);
         odao.save(o2);
         odao.save(o3);
         p1.getOvChipkaarten().add(o2);
@@ -64,6 +66,23 @@ public class Main {
         }
         System.out.println("-------------------------------------------------------------");
 
+        //test update product en de daarbij behorende relaties
+        System.out.println("\n--------update product en de daarbij behorende relaties-------");
+        System.out.println("---voor:");
+        System.out.println(p1);
+        OVChipkaart o4 = new OVChipkaart(20000, Date.valueOf("2031-09-19"), 1, 50000, 1);
+        odao.save(o4);
+        p1.getOvChipkaarten().add(o4);
+//        p1.setNaam("NIEUWENAAM");
+        pdao.update(p1);
+        System.out.println("\n---na:");
+        for (Product product : pdao.findall()) {
+            if (product.getProduct_nummer() == p1.getProduct_nummer()) {
+                System.out.println(product);
+                break;
+            }
+        }
+
         //test verwijder een product en verwijder tegelijk alle producten van de ovchipkaarten die dat product hebben
         System.out.println("\n--------Verwijder product en producten van ovchipkaart-------");
         System.out.println("---voor:");
@@ -76,5 +95,5 @@ public class Main {
             System.out.println(ovChipkaart);
         }
         System.out.println("-------------------------------------------------------------");
-        }
+    }
     }

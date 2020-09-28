@@ -33,7 +33,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setDate(5, reiziger.getGeboortedatum());
             preparedStatement.execute();
 
-            //update het adres van de reiziger
+            //saved het adres van de reiziger
             adao.save(reiziger.getAdres());
 
             //saved alle ovchipkaarten die horen bij de reiziger
